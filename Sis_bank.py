@@ -1,4 +1,78 @@
+from abc import ABC, abstractclassmethod, abstractproperty
 import textwrap
+from datetime import date
+
+class Conta:
+    def __init__(self):
+        self.__saldo: float
+        self.__numero: int
+        self.__agencia: str
+        self.__cliente: Cliente
+        self.__historico: Historico
+
+    def saldo():
+        pass
+
+    def nova_conta(cliente:Cliente, numero:int):
+        pass
+
+    def sacar(valor:float):
+        pass
+
+    def depositar(valor:float):
+        pass
+
+
+class Historico:
+    def adicionar_transacao(transacao:Transacao):
+        pass
+
+class ContaCorrente(Conta):
+    def __init__(self):
+        super().__init__()
+        self._limite: float
+        self._limite_saques: int
+        
+        
+class Transacao(ABC):
+    @abstractclassmethod
+    def registrar(conta:Conta):
+        pass
+
+class Saque(Transacao):
+    def __init__(self):
+        super().__init__()
+        self._valor: float
+
+class Deposito(Transacao):
+    def __init__(self):
+        super().__init__()
+        self._valor: float
+
+class Cliente:
+    def __init__(self):
+        self.endereco: str
+        self.contas: list
+
+    def realizar_transacao(conta:Conta, transacao:Transacao):
+        pass
+    
+    def adicionar_conta(conta:Conta):
+        pass
+
+class PessoaFisica(Cliente):
+    def __init__(self):
+        super().__init__()
+        self._cpf: str
+        self._nome: str
+        self._data_nascimento: date
+
+class PessoaJuridica(Cliente):
+    def __init__(self):
+        super().__init__()
+        self._cnpj: str
+        self._razao_social: str
+
 
 def menu():
     menu = '''\n
@@ -165,5 +239,5 @@ def main():
         else:
             print('Operação inválida, por favor selecione a opção desejada.')
 
-
-main()
+if __name__ == "__main__":
+    main()
