@@ -1,30 +1,75 @@
-from abc import ABC, abstractclassmethod, abstractproperty
+from abc import ABC,abstractmethod, classmethod, property
 import textwrap
-from datetime import date
+from datetime import date, datetime
 
 class Conta:
-    def __init__(self):
-        self.__saldo: float
-        self.__numero: int
-        self.__agencia: str
-        self.__cliente: Cliente
-        self.__historico: Historico
+    def __init__(self, numero, cliente):
+        self._saldo = 0
+        self._numero = numero
+        self._agencia = '0001'
+        self._cliente = cliente
+        self._historico = Historico()
 
-    def saldo():
-        pass
+    @classmethod
+    def nova_conta(cls, cliente, numero):
+        return cls(cliente, numero)
 
-    def nova_conta(cliente:Cliente, numero:int):
-        pass
+    @property
+    def saldo(self):
+        return self._saldo
 
-    def sacar(valor:float):
-        pass
+    @property
+    def numero(self):
+        return self._numero
 
-    def depositar(valor:float):
-        pass
+    @property
+    def agencia(self):
+        return self._agencia
 
+    @property
+    def cliente(self):
+        return self._cliente
+    
+    @property
+    def historico(self):
+        return self._historico
+    
+    def sacar(self, valor):
+        saldo = self.saldo
+        excedeu_saldo = valor > saldo
+
+        try:        
+    
+            if excedeu_saldo:
+                print('\n@@@ Saldo insuficiente. @@@')
+        
+            elif valor > 0:
+                self.saldo -= valor
+                print('\n!!!!!! Saque realizado com sucesso! !!!!!!')
+                return True
+            
+            else:
+                print('\n@@@ Operação falhou! O valor informado é invalido. @@@')
+
+        except ValueError:
+            print('\n@@@ Operação falhou! O valor informado é invalido. @@@')
+    
+        return False
+
+    def depositar(self, valor):
+        try:
+            if valor > 0:
+                self._saldo += valor
+                print('\n!!!!!! Depoósito realizado com sucesso! !!!!!!')
+                return True
+            else:
+                print('\n@@@ Operação falhou! O valor informado é invalido')
+        except ValueError:
+            print('\n@@@ Operação falhou! O valor informado é invalido')
+        return False
 
 class Historico:
-    def adicionar_transacao(transacao:Transacao):
+    def adicionar_transacao(self, transacao):
         pass
 
 class ContaCorrente(Conta):
@@ -32,11 +77,21 @@ class ContaCorrente(Conta):
         super().__init__()
         self._limite: float
         self._limite_saques: int
-        
+    
+    def extrato(self):
+        pass
+
+    def transferir(self, valor, conta_destino):
+        pass
+
+    def sacar(self, valor):
+        excedeu_limite = valor > limite
+        excedeu_saques = numero_saques >= limite_saques
+        return super().sacar(valor)
         
 class Transacao(ABC):
-    @abstractclassmethod
-    def registrar(conta:Conta):
+    @classmethod
+    def registrar(self, conta):
         pass
 
 class Saque(Transacao):
@@ -50,28 +105,28 @@ class Deposito(Transacao):
         self._valor: float
 
 class Cliente:
-    def __init__(self):
-        self.endereco: str
-        self.contas: list
+    def __init__(self, endereco):
+        self.endereco = endereco
+        self.contas = []
 
-    def realizar_transacao(conta:Conta, transacao:Transacao):
-        pass
+    def realizar_transacao(self, conta, transacao):
+        transacao.registrar(conta)
     
-    def adicionar_conta(conta:Conta):
-        pass
+    def adicionar_conta(self, conta):
+        self.contas.append(conta)
 
 class PessoaFisica(Cliente):
-    def __init__(self):
-        super().__init__()
-        self._cpf: str
-        self._nome: str
-        self._data_nascimento: date
+    def __init__(self, nome, cpf, data_nascimento, endereco):
+        super().__init__(endereco)
+        self._nome = nome
+        self._cpf = cpf
+        self._data_nascimento = data_nascimento
 
 class PessoaJuridica(Cliente):
-    def __init__(self):
-        super().__init__()
-        self._cnpj: str
-        self._razao_social: str
+    def __init__(self, razao_social, cnpj, endereco):
+        super().__init__(endereco)
+        self._razao_social = razao_social
+        self._cnpj = cnpj
 
 
 def menu():
