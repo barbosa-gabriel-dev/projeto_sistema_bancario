@@ -1,6 +1,6 @@
-from abc import ABC,abstractmethod, classmethod, property
+from abc import ABC, abstractmethod, classmethod, property
 import textwrap
-from datetime import date, datetime
+from datetime import datetime
 
 class Conta:
     def __init__(self, numero, cliente):
@@ -68,15 +68,13 @@ class Conta:
             print('\n@@@ Operação falhou! O valor informado é invalido')
         return False
 
-class Historico:
-    def adicionar_transacao(self, transacao):
-        pass
-
 class ContaCorrente(Conta):
-    def __init__(self):
-        super().__init__()
-        self._limite: float
-        self._limite_saques: int
+    data_hora = datetime.now()
+    def __init__(self, numero, cliente, limite=500, limite_saques=3,limite_transacoes=10):
+        super().__init__(numero, cliente)
+        self.limite = limite
+        self.limite_saques = limite_saques
+        self.limite_transacoes = limite_transacoes
     
     def extrato(self):
         pass
@@ -85,24 +83,114 @@ class ContaCorrente(Conta):
         pass
 
     def sacar(self, valor):
-        excedeu_limite = valor > limite
-        excedeu_saques = numero_saques >= limite_saques
-        return super().sacar(valor)
+        numero_transacoes = len(
+            [transacao for transacao in self.historico.transacoes 
+            if transacao['data'] > datetime.now().strftime('%d-%m-%Y 00:00:00')
+            and transacao['data'] < datetime.now().strftime('%d-%m-%Y %H:%M:%S')]
+        )
+        
+        numero_saques = len(
+            [transacao for transacao in self.historico.transacoes 
+            if transacao['tipo'] == Saque.__name__]
+        )
+
+        excedeu_transacoes = numero_transacoes >= self.limite_transacoes
+        excedeu_limite = valor > self.limite
+        excedeu_saques = numero_saques >= self.limite_saques
+
+        if excedeu_limite:
+            print('\n@@@ Operação falhou! Ovalor de saque Excede o limite. @@@')
+
+        elif excedeu_saques:
+            print('\n@@@ Operação falhou! Número maximo de saques excedido, @@@')
+
+        elif excedeu_transacoes:
+            print('\n@@@ Operação falhou! Número maximo de trasações diarias excedido, @@@')
+
+        
+        else:
+            return super().sacar(valor)
+        return False
+    
+    def depositar(self, valor):
+        numero_transacoes = len(
+            [transacao for transacao in self.historico.transacoes 
+            if transacao['data'] > datetime.now().strftime('%d-%m-%Y 00:00:00')
+            and transacao['data'] < datetime.now().strftime('%d-%m-%Y %H:%M:%S')]
+        )
+        
+        excedeu_transacoes = numero_transacoes >= self.limite_transacoes
+
+        if excedeu_transacoes:
+            print('\n@@@ Operação falhou! Número maximo de trasações diarias excedido, @@@')
+
+        else:
+            return super().depositar(valor)
+        return False
+    
+        
+    def __str__(self):
+        return f'''\
+            Agência:\t{self.agencia}
+            C/C:\t\t{self.numero}
+            Titular:\t{self.cliente}
+            '''
+
+class Historico:
+    def __init__(self):
+        self._transacoes = []
+
+    @property
+    def transacoes(self):
+        return self._transacoes
+    
+    def adicionar_transacao(self, transacao):
+        self._transacoes.append(
+            {
+                'tipo': transacao.__class__.__name__,
+                'valor': transacao.valor,
+                'data': datetime.now().strftime('%d-%m-%Y %H:%M:%S'),
+            }
+        )
         
 class Transacao(ABC):
-    @classmethod
-    def registrar(self, conta):
+   @property
+   @abstractmethod
+   def valor(self):
+       pass
+   
+   @classmethod
+   @abstractmethod
+   def registrar(self, conta):
         pass
 
 class Saque(Transacao):
-    def __init__(self):
-        super().__init__()
-        self._valor: float
+    def __init__(self, valor):
+        self._valor = valor
+
+    @property
+    def valor(self):
+        return self._valor
+    
+    def registrar(self, conta):
+        sucesso_transacao = conta.sacar(self.valor)
+
+        if sucesso_transacao:
+            conta.historico.adicionar_transacao(self)
 
 class Deposito(Transacao):
-    def __init__(self):
-        super().__init__()
-        self._valor: float
+    def __init__(self, valor):
+        self._valor = valor
+
+    @property
+    def valor(self):
+        return self._valor
+    
+    def registrar(self, conta):
+        sucesso_transacao = conta.depositar(self.valor)
+
+        if sucesso_transacao:
+            conta.historico.adicionar_transacao(self)
 
 class Cliente:
     def __init__(self, endereco):
