@@ -38,52 +38,38 @@ class Conta:
         saldo = self.saldo
         excedeu_saldo = valor > saldo
 
-        try:        
-    
-            if excedeu_saldo:
-                print("\n@@@ Operação falhou! Você não tem saldo suficiente. @@@")
+        if excedeu_saldo:
+            print("\n@@@ Operação falhou! Você não tem saldo suficiente. @@@")
         
-            elif valor > 0:
-                self._saldo -= valor
-                print("\n=== Saque realizado com sucesso! ===")
-                return True
+        elif valor > 0:
+            self._saldo -= valor
+            print("\n=== Saque realizado com sucesso! ===")
+            return True
             
-            else:
-                print("\n@@@ Operação falhou! O valor informado é invalido. @@@")
-
-        except ValueError:
+        else:
             print("\n@@@ Operação falhou! O valor informado é invalido. @@@")
-    
+
         return False
 
     def depositar(self, valor):
-        try:
-            if valor > 0:
-                self._saldo += valor
-                print("\n!!!!!! Depoósito realizado com sucesso! !!!!!!")
-                return True
-            else:
-                print("\n@@@ Operação falhou! O valor informado é invalido.")
-        except ValueError:
+        if valor > 0:
+            self._saldo += valor
+            print("\n=== Depoósito realizado com sucesso! ===")
+            return True
+        
+        else:
             print("\n@@@ Operação falhou! O valor informado é invalido.")
+       
         return False
 
 class ContaCorrente(Conta):
-    data_hora = datetime.now()
+    
     def __init__(self, numero, cliente, limite=500, limite_saques=3,limite_transacoes=10):
         super().__init__(numero, cliente)
         self.limite = limite
         self.limite_saques = limite_saques
         self.limite_transacoes = limite_transacoes
     
-    # FIXME: Implementar
-    def extrato(self):
-        pass
-
-    # FIXME: Implementar
-    def transferir(self, valor, conta_destino):
-        pass
-
     def sacar(self, valor):
         numero_transacoes = len(
             [transacao for transacao in self.historico.transacoes 
@@ -132,10 +118,10 @@ class ContaCorrente(Conta):
     
         
     def __str__(self):
-        return f'''\
+        return f'''
             Agência:\t{self.agencia}
-            C/C:\t\t{self.numero}
-            Titular:\t{self.cliente}
+            C/C:\t{self.numero}
+            Titular:\t{self.cliente.cpf}\t{self.cliente.nome}
             '''
 
 class Historico:
@@ -212,12 +198,6 @@ class PessoaFisica(Cliente):
         self.cpf = cpf
         self.data_nascimento = data_nascimento
 
-class PessoaJuridica(Cliente):
-    def __init__(self, razao_social, cnpj, endereco):
-        super().__init__(endereco)
-        self.razaosocial = razao_social
-        self.cnpj = cnpj
-
 
 def menu():
     menu = """\n
@@ -253,7 +233,7 @@ def depositar(clientes):
     
     cliente.realizar_transacao(conta, transacao)
 
-# FIXME: transformar as funções depositar e sacar em uma só que solicita o tipo de transação
+# TODO: transformar as funções depositar e sacar em uma só que solicita o tipo de transação
 def sacar(clientes):
     cpf = input("Informe o CPF do cliente: " )
     cliente = filtrar_cliente(cpf, clientes)
@@ -297,7 +277,6 @@ def exibir_extrato(clientes):
     print("\n=========================================")
 
 
-# FIXME: implatar a difereciação de clientes pessoa fisica e juridica
 def criar_cliente(clientes):
     cpf = input("Informe o CPF do cliente: ")
     cliente = filtrar_cliente(cpf, clientes)
@@ -315,7 +294,7 @@ def criar_cliente(clientes):
 
     clientes.append(cliente)
 
-    print("\n!!!!!! Cliente criado com sucesso! !!!!!!")
+    print("\n=== Cliente criado com sucesso! ===")
     
 
 def filtrar_cliente(cpf, clientes):
@@ -328,8 +307,22 @@ def recuperar_conta_cliente(cliente):
         print('\n@@@ Cliente não possui conta! @@@')
         return
     
-    # FIXME: não permite cliente escolher a conta
-    return cliente.contas[0]
+    numerador = 0
+    print("Contas do cliente:")
+    for conta in cliente.contas:
+        print(f"[{numerador}]  {conta}")
+   
+    while True:
+        try:
+            selecao_conta = int(input("\nSelecione a conta: "))
+            
+            if selecao_conta in range(len(cliente.contas)):
+                return cliente.contas[selecao_conta]   
+            else:
+                print("@@@ Número incorreto conta não encontrada! @@@")
+            
+        except ValueError:
+            print("@@@ Entrada inválida. Por favor, digite apenas números. @@@")
 
 
 def criar_conta(numero_conta,clientes,contas):
@@ -344,7 +337,7 @@ def criar_conta(numero_conta,clientes,contas):
     contas.append(conta)
     cliente.contas.append(conta)
 
-    print('\n!!!!!! Conta criada com sucesso! !!!!!!')
+    print('\n=== Conta criada com sucesso! ===')
     
 
 def listar_contas(contas):
