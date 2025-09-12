@@ -1,0 +1,5 @@
+# Dependências principais
+# (nenhuma - projeto usa apenas biblioteca padrão do Python)
+
+# Dependências de desenvolvimento
+pytest>=8.0.0
