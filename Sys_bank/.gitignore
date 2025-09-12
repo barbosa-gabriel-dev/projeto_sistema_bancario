@@ -1,0 +1,35 @@
+# ===== Ambiente Virtual =====
+venv/
+env/
+.venv/
+.env/
+
+# ===== Python Cache =====
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ===== Configurações do Pytest =====
+.pytest_cache/
+.cache/
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+*.tmp
+htmlcov/
+
+# ===== Arquivos do sistema =====
+.DS_Store
+Thumbs.db
+
+# ===== IDEs e editores =====
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# ===== Arquivos de build =====
+build/
+dist/
+*.egg-info/
