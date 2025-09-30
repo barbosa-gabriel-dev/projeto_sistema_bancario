@@ -1,47 +1,41 @@
+
+import textwrap
 from sys_bank.services.database_manager import DatabaseManager
-# IMPORTANTE: Importar os modelos que vamos usar
 from sys_bank.models.cliente import PessoaFisica
 from sys_bank.models.conta import ContaCorrente
 from sys_bank.models.transacao import Deposito, Saque, Transferencia
 
-# A instância do db_manager continua sendo a ponte com o banco de dados
 db_manager = DatabaseManager()
 
 def depositar():
-    # 1. Recuperamos os OBJETOS do cliente e da conta
+    
     cliente_obj, conta_obj = recuperar_cliente_e_conta()
+    
     if not cliente_obj:
         return
-
+    
     try:
         valor = float(input("Informe o valor do depósito: "))
-        # 2. Criamos o OBJETO da transação
         transacao = Deposito(valor)
-        
-        # 3. Usamos o método do OBJETO cliente para realizar a transação
         cliente_obj.realizar_transacao(conta_obj, transacao)
-        
-        # 4. Persistimos a mudança no banco de dados
         db_manager.atualizar_saldo(conta_obj.id_db, conta_obj.saldo)
         db_manager.insert_transacao(conta_obj.id_db, "deposito", valor)
-
+    
     except ValueError:
         print("\n@@@ Valor inválido! Por favor, informe um número. @@@")
 
 def sacar():
     cliente_obj, conta_obj = recuperar_cliente_e_conta()
+    
     if not cliente_obj:
-        return
-        
+        return 
+    
     try:
         valor = float(input("Informe o valor do saque: "))
         transacao = Saque(valor)
-
-        # A chamada é a mesma, mas o polimorfismo faz com que a lógica de saque seja executada
         cliente_obj.realizar_transacao(conta_obj, transacao)
-        
-        # Apenas persistimos no banco se a transação foi bem-sucedida (o saldo mudou)
         conta_db = db_manager.execute_query("SELECT saldo FROM contas WHERE id=?", (conta_obj.id_db,)).fetchone()
+       
         if conta_db['saldo'] != conta_obj.saldo:
             db_manager.atualizar_saldo(conta_obj.id_db, conta_obj.saldo)
             db_manager.insert_transacao(conta_obj.id_db, "saque", valor)
@@ -102,7 +96,6 @@ def transferir():
         db_manager.atualizar_saldo(conta_origem_obj.id_db, conta_origem_obj.saldo)
         db_manager.atualizar_saldo(conta_destino_obj.id_db, conta_destino_obj.saldo)
         # O registro de transações no DB já é feito pelo método transferir do database_manager
-        # que podemos chamar para garantir consistência
         db_manager.transferir(conta_origem_obj.id_db, conta_destino_obj.id_db, valor)
 
 def exibir_extrato():
@@ -115,7 +108,6 @@ def exibir_extrato():
         print("Não foram realizadas movimentações.")
     else:
         for transacao in conta_obj.historico.transacoes:
-            # Usamos os dados do histórico do objeto
             print(f"{transacao['data'].strftime('%Y-%m-%d %H:%M:%S')} - {transacao['tipo']}: R$ {transacao['valor']:.2f}")
     
     print(f"\nSaldo atual: R$ {conta_obj.saldo:.2f}")
@@ -152,19 +144,16 @@ def criar_conta():
     print(f"\n=== Conta {numero_conta} criada com sucesso para o cliente {cliente_data['nome']}! ===")
 
 def listar_contas():
-    """Busca todas as contas no banco de dados e as exibe de forma formatada."""
+    #NOTE:Busca todas as contas no banco de dados e as exibe de forma formatada.
     print("\n================ LISTA DE CONTAS ================")
     
-    # 1. Chama o método do DatabaseManager que já faz o JOIN com a tabela de clientes
     contas = db_manager.listar_contas_com_clientes()
 
-    # 2. Verifica se a lista de contas está vazia
     if not contas:
         print("Nenhuma conta cadastrada no sistema.")
         print("=================================================")
         return
 
-    # 3. Itera sobre os resultados e exibe cada conta formatada
     for conta in contas:
         info_conta = f"""
             Agência:\t{conta['agencia']}
@@ -229,4 +218,22 @@ def selecionar_conta(contas):
     # (Esta função auxiliar permanece a mesma do seu código original)
     if len(contas) == 1:
         return contas[0]
-    # ... (resto da função igual)
+
+    print("\nCliente possui mais de uma conta. Por favor, selecione uma:")
+    for idx, conta in enumerate(contas):
+        print(f"  [{idx}] Agência: {conta['agencia']} | C/C: {conta['numero']} (Saldo: R$ {conta['saldo']:.2f})")
+
+        while True:
+        try:
+            selecao = int(input("\nDigite o número da conta desejada: "))
+            
+            if 0 <= selecao < len(contas):
+                return contas[selecao]
+            else:
+                print("@@@ Opção inválida. Por favor, escolha um dos números listados acima. @@@")
+        
+        except ValueError:
+            print("@@@ Entrada inválida. Por favor, digite apenas o número da opção. @@@")
+        except KeyboardInterrupt:
+            print("\nOperação cancelada pelo usuário.")
+            return None

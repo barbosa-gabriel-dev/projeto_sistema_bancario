@@ -1,5 +1,4 @@
-# O sys.path pode ser removido se você executar o script como um módulo
-# a partir da raiz do projeto, ex: python -m sys_bank.main
+
 from sys_bank.utils.menu import menu
 from sys_bank.services.operacoes import (
     criar_cliente,
@@ -10,7 +9,7 @@ from sys_bank.services.operacoes import (
     trasferir,
     listar_contas
 )
-# A função listar_contas_formatado não foi importada para manter o menu simples
+
 
 def main():
     while True:

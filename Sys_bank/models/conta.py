@@ -58,13 +58,10 @@ class Conta:
         return False
 
     def transferir(self, conta_destino, valor):
-        """Tenta sacar da conta atual e depositar na conta de destino."""
-        # A lógica de saque da conta corrente (com limites) será usada aqui
-        # graças ao polimorfismo.
+        #NOTE:Tenta sacar da conta atual e depositar na conta de destino.
         if not self.sacar(valor):
-            return False # Se o saque falhar, a transferência falha.
+            return False
 
-        # Se o saque foi bem-sucedido, o depósito é realizado.
         conta_destino.depositar(valor)
         return True
 
@@ -78,7 +75,7 @@ class ContaCorrente(Conta):
         self.limite_transacoes = limite_transacoes
     
     def _transacoes_diarias(self):
-        """Retorna uma lista de transações realizadas hoje."""
+        #NOTE:Retorna uma lista de transações realizadas hoje.
         return [t for t in self.historico.transacoes if t['data'].date() == date.today()]
     
     def sacar(self, valor):

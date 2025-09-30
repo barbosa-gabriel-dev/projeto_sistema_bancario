@@ -10,8 +10,7 @@ class Cliente:
         self.contas.append(conta)
 
     def realizar_transferencia(self, conta_origem, conta_destino, transacao):
-        """Método para orquestrar uma transferência."""
-        # CORRIGIDO: Chama o método com o novo nome
+        #NOTE:Método para orquestrar uma transferência.
         transacao.registrar_transferencia(conta_origem, conta_destino)
 
 class PessoaFisica(Cliente):

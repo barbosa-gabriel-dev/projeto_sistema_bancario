@@ -13,20 +13,20 @@ class DatabaseManager:
         self.connection = None
 
     def connect(self):
-        """Abre e retorna uma conexão com o banco de dados."""
+        #NOTE:Abre e retorna uma conexão com o banco de dados.
         if not self.connection:
             self.connection = sqlite3.connect(self.db_path)
             self.connection.row_factory = sqlite3.Row
         return self.connection
 
     def close(self):
-        """Fecha conexão se estiver aberta."""
+        #NOTE:Fecha conexão se estiver aberta.
         if self.connection:
             self.connection.close()
             self.connection = None
 
     def execute_query(self, query, params=(), commit=False):
-        """Executa uma query genérica."""
+        #NOTE:Executa uma query genérica.
         conn = self.connect()
         cursor = conn.cursor()
         cursor.execute(query, params)
@@ -78,7 +78,7 @@ class DatabaseManager:
         self.connection.commit()
 
     def reset_db(self):
-        """Apaga e recria o banco de dados do zero."""
+        #NOTE:Apaga e recria o banco de dados do zero.
         if os.path.exists(self.db_path):
             os.remove(self.db_path)
         self.create_schema()

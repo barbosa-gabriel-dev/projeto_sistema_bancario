@@ -27,9 +27,7 @@ class Saque(Transacao):
      def registrar_transferencia(self, conta_origem, conta_destino):
         #NOTE:Registra a transação em ambas as contas.
         if conta_origem.transferir(conta_destino, self.valor):
-            # Adiciona ao histórico da origem como "saída"
             conta_origem.historico.adicionar_transacao(self, tipo="Transferência Enviada")
-            # Adiciona ao histórico do destino como "entrada"
             conta_destino.historico.adicionar_transacao(self, tipo="Transferência Recebida")
 
 class Deposito(Transacao):
