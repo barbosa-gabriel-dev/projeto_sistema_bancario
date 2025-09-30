@@ -35,21 +35,16 @@ class Conta:
         return self._historico
     
     def sacar(self, valor):
-        saldo = self.saldo
-        excedeu_saldo = valor > saldo
-
-        if excedeu_saldo:
-            print("\n@@@ Operação falhou! Você não tem saldo suficiente. @@@")
+        if valor > self.saldo:
+            print("\n@@@ Operação falhou! Saldo insuficiente. @@@")
+            return False
+        if valor <= 0:
+            print("\n@@@ Operação falhou! O valor informado é inválido. @@@")
+            return False
         
-        elif valor > 0:
-            self._saldo -= valor
-            print("\n=== Saque realizado com sucesso! ===")
-            return True
-            
-        else:
-            print("\n@@@ Operação falhou! O valor informado é invalido. @@@")
-
-        return False
+        self._saldo -= valor
+        print("\n=== Saque realizado com sucesso! ===")
+        return True
 
     def depositar(self, valor):
         if valor > 0:
@@ -64,57 +59,47 @@ class Conta:
 
 class ContaCorrente(Conta):
     
-    def __init__(self, numero, cliente, limite=500, limite_saques=3,limite_transacoes=10):
+    def __init__(self, numero, cliente, tipo="corrente", limite=500, limite_saques=3,limite_transacoes=10):
         super().__init__(numero, cliente)
+        self.tipo = tipo
         self.limite = limite
         self.limite_saques = limite_saques
         self.limite_transacoes = limite_transacoes
     
+    def _transacoes_diarias(self):
+        """Retorna uma lista de transações realizadas hoje."""
+        return [t for t in self.historico.transacoes if t['data'].date() == date.today()]
+    
     def sacar(self, valor):
-        numero_transacoes = len(
-            [transacao for transacao in self.historico.transacoes 
-            if transacao['data'] > datetime.now().strftime('%d-%m-%Y 00:00:00')
-            and transacao['data'] < datetime.now().strftime('%d-%m-%Y %H:%M:%S')]
-        )
+        transacoes_hoje = self._transacoes_diarias()
         
         numero_saques = len(
-            [transacao for transacao in self.historico.transacoes 
-            if transacao['tipo'] == Saque.__name__]
+            [t for t in transacoes_hoje if t['tipo'] == Saque.__name__]
         )
 
-        excedeu_transacoes = numero_transacoes >= self.limite_transacoes
-        excedeu_limite = valor > self.limite
-        excedeu_saques = numero_saques >= self.limite_saques
+        if valor > self.limite:
+            print("\n@@@ Operação falhou! O valor de saque excede o limite. @@@")
+            return False
+        if numero_saques >= self.limite_saques:
+            print("\n@@@ Operação falhou! Número máximo de saques excedido. @@@")
+            return False
+        if len(transacoes_hoje) >= self.limite_transacoes:
+            print("\n@@@ Operação falhou! Número máximo de transações diárias excedido. @@@")
+            return False
 
-        if excedeu_limite:
-            print("\n@@@ Operação falhou! O valor de saque Excede o limite. @@@")
-
-        elif excedeu_saques:
-            print("\n@@@ Operação falhou! Número maximo de saques excedido, @@@")
-
-        elif excedeu_transacoes:
-            print("\n@@@ Operação falhou! Número maximo de transações diarias excedido, @@@")
-
-        
-        else:
-            return super().sacar(valor)
-        return False
+        return super().sacar(valor)
     
     def depositar(self, valor):
-        numero_transacoes = len(
-            [transacao for transacao in self.historico.transacoes 
-            if transacao['data'] > datetime.now().strftime('%d-%m-%Y 00:00:00')
-            and transacao['data'] < datetime.now().strftime('%d-%m-%Y %H:%M:%S')]
-        )
+        transacoes_hoje = self._transacoes_diarias()
         
-        excedeu_transacoes = numero_transacoes >= self.limite_transacoes
+        excedeu_transacoes = len(transacoes_hoje) >= self.limite_transacoes
 
-        if excedeu_transacoes:
+        if len(transacoes_hoje) >= self.limite_transacoes:
             print("\n@@@ Operação falhou! Número maximo de transações diarias excedido, @@@")
+            return False
 
-        else:
-            return super().depositar(valor)
-        return False
+        return super().depositar(valor)
+        return True
     
         
     def __str__(self):

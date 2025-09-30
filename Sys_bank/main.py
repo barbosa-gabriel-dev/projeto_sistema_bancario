@@ -1,75 +1,45 @@
-import sys
-import os
-sys.path.append(
-    os.path.dirname(
-        os.path.dirname(
-            os.path.abspath(__file__)
-            )))
-
-from sys_bank.utils import menu
+# O sys.path pode ser removido se você executar o script como um módulo
+# a partir da raiz do projeto, ex: python -m sys_bank.main
+from sys_bank.utils.menu import menu
 from sys_bank.services.operacoes import (
     criar_cliente,
     criar_conta,
     depositar,
     sacar,
-    transferir,
-    listar_clientes,
-    listar_contas,
-    listar_transacoes,
+    exibir_extrato
 )
-
+# A função listar_contas_formatado não foi importada para manter o menu simples
 
 def main():
     while True:
         opcao = menu()
 
         if opcao == "1":
-            nome = input("Nome: ")
-            cpf = input("CPF: ")
-            email = input("Email: ")
-            telefone = input("Telefone: ")
-            criar_cliente(nome, cpf, email, telefone)
+            criar_cliente()
 
         elif opcao == "2":
-            cliente_id = int(input("ID do Cliente: "))
-            tipo = input("Tipo de Conta (corrente/poupanca): ").lower()
-            criar_conta(cliente_id, tipo)
+            criar_conta()
 
         elif opcao == "3":
-            conta_id = int(input("ID da Conta: "))
-            valor = float(input("Valor do Depósito: "))
-            depositar(conta_id, valor)
+            depositar()
 
         elif opcao == "4":
-            conta_id = int(input("ID da Conta: "))
-            valor = float(input("Valor do Saque: "))
-            sacar(conta_id, valor)
+            sacar()
 
         elif opcao == "5":
-            origem_id = int(input("ID da Conta de Origem: "))
-            destino_id = int(input("ID da Conta de Destino: "))
-            valor = float(input("Valor da Transferência: "))
-            transferir(origem_id, destino_id, valor)
-
+            exibir_extrato()
+            
         elif opcao == "6":
-            listar_clientes()
-
-        elif opcao == "7":
-            listar_contas()
-
-        elif opcao == "8":
-            listar_transacoes()
-
+            #TODO: Para listar contas, você pode criar uma função em operacoes.py
+            # que chame db_manager.listar_contas_com_clientes() e formate a saída
+            print("Funcionalidade de listar contas ainda não implementada no menu principal.")
+            
         elif opcao == "0":
-            print("Saindo do sistema...")
+            print("\nSaindo do sistema... Obrigado por usar o SysBank!")
             break
 
         else:
-            print("Opção inválida! Tente novamente.")
-
-
-if __name__ == "__main__":
-    main()
+            print("\n@@@ Opção inválida! Tente novamente. @@@")
 
 if __name__ == "__main__":
     main()
