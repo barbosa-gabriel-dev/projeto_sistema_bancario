@@ -57,6 +57,17 @@ class Conta:
        
         return False
 
+    def transferir(self, conta_destino, valor):
+        """Tenta sacar da conta atual e depositar na conta de destino."""
+        # A lógica de saque da conta corrente (com limites) será usada aqui
+        # graças ao polimorfismo.
+        if not self.sacar(valor):
+            return False # Se o saque falhar, a transferência falha.
+
+        # Se o saque foi bem-sucedido, o depósito é realizado.
+        conta_destino.depositar(valor)
+        return True
+
 class ContaCorrente(Conta):
     
     def __init__(self, numero, cliente, tipo="corrente", limite=500, limite_saques=3,limite_transacoes=10):

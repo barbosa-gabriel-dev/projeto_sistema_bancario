@@ -2,7 +2,7 @@ from sys_bank.services.database_manager import DatabaseManager
 # IMPORTANTE: Importar os modelos que vamos usar
 from sys_bank.models.cliente import PessoaFisica
 from sys_bank.models.conta import ContaCorrente
-from sys_bank.models.transacao import Deposito, Saque
+from sys_bank.models.transacao import Deposito, Saque, Transferencia
 
 # A instância do db_manager continua sendo a ponte com o banco de dados
 db_manager = DatabaseManager()
@@ -48,6 +48,62 @@ def sacar():
 
     except ValueError:
         print("\n@@@ Valor inválido! Por favor, informe um número. @@@")
+
+def transferir():
+    # 1. Recupera os objetos do cliente e da conta de ORIGEM
+    cliente_origem_obj, conta_origem_obj = recuperar_cliente_e_conta()
+    if not cliente_origem_obj:
+        return
+
+    # 2. Pede os dados da conta de DESTINO
+    try:
+        numero_conta_destino = int(input("Informe o número da conta de destino: "))
+        conta_destino_data = db_manager.execute_query(
+            "SELECT * FROM contas WHERE numero = ?", (numero_conta_destino,)
+        ).fetchone()
+
+        if not conta_destino_data:
+            print("\n@@@ Conta de destino não encontrada! @@@")
+            return
+        
+        if conta_destino_data['id'] == conta_origem_obj.id_db:
+            print("\n@@@ Conta de origem e destino não podem ser a mesma! @@@")
+            return
+        
+        valor = float(input("Informe o valor da transferência: "))
+
+    except ValueError:
+        print("\n@@@ Valor ou número de conta inválido! Operação cancelada. @@@")
+        return
+
+    # 3. "Hidrata" o objeto da conta de DESTINO
+    cliente_destino_data = db_manager.execute_query(
+        "SELECT * FROM clientes WHERE id = ?", (conta_destino_data['cliente_id'],)
+    ).fetchone()
+
+    cliente_destino_obj = PessoaFisica(
+        nome=cliente_destino_data['nome'], cpf=cliente_destino_data['cpf'],
+        data_nascimento=cliente_destino_data['data_nascimento'], endereco=cliente_destino_data['endereco']
+    )
+    
+    conta_destino_obj = ContaCorrente(numero=conta_destino_data['numero'], cliente=cliente_destino_obj)
+    conta_destino_obj._saldo = conta_destino_data['saldo']
+    conta_destino_obj.id_db = conta_destino_data['id']
+    
+    # 4. Cria o objeto da transação e executa
+    transacao = Transferencia(valor)
+    cliente_origem_obj.realizar_transferencia(conta_origem_obj, conta_destino_obj, transacao)
+
+    # 5. Persiste as alterações no banco de dados, se houveram
+    conta_origem_db = db_manager.execute_query("SELECT saldo FROM contas WHERE id=?", (conta_origem_obj.id_db,)).fetchone()
+    
+    if conta_origem_db['saldo'] != conta_origem_obj.saldo:
+        print("\n=== Transferência realizada com sucesso! ===")
+        db_manager.atualizar_saldo(conta_origem_obj.id_db, conta_origem_obj.saldo)
+        db_manager.atualizar_saldo(conta_destino_obj.id_db, conta_destino_obj.saldo)
+        # O registro de transações no DB já é feito pelo método transferir do database_manager
+        # que podemos chamar para garantir consistência
+        db_manager.transferir(conta_origem_obj.id_db, conta_destino_obj.id_db, valor)
 
 def exibir_extrato():
     cliente_obj, conta_obj = recuperar_cliente_e_conta()

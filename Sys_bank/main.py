@@ -6,7 +6,8 @@ from sys_bank.services.operacoes import (
     criar_conta,
     depositar,
     sacar,
-    exibir_extrato
+    exibir_extrato,
+    trasferir
 )
 # A função listar_contas_formatado não foi importada para manter o menu simples
 
@@ -27,9 +28,12 @@ def main():
             sacar()
 
         elif opcao == "5":
+            trasferir()
+
+        elif opcao == "6":
             exibir_extrato()
             
-        elif opcao == "6":
+        elif opcao == "7":
             #TODO: Para listar contas, você pode criar uma função em operacoes.py
             # que chame db_manager.listar_contas_com_clientes() e formate a saída
             print("Funcionalidade de listar contas ainda não implementada no menu principal.")

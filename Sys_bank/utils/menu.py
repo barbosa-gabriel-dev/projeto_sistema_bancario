@@ -9,8 +9,9 @@ def menu():
     [2] Criar Conta
     [3] Depositar
     [4] Sacar
-    [5] Exibir Extrato
-    [6] Listar Contas
+    [5] Transferir 
+    [6] Exibir Extrato
+    [7] Listar Contas
     [0] Sair
 
     => """
