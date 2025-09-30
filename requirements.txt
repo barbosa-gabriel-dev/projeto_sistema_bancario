@@ -1,5 +1,9 @@
-# Dependências principais
-# (nenhuma - projeto usa apenas biblioteca padrão do Python)
+# =========================================================
+# Dependências para o ambiente de desenvolvimento e testes
+# =========================================================
 
-# Dependências de desenvolvimento
-pytest>=8.0.0
+# Framework para testes automatizados
+pytest==8.2.2
+
+# Plugin para gerar relatórios de testes em formato HTML
+pytest-html==4.1.1

@@ -151,6 +151,31 @@ def criar_conta():
     db_manager.insert_conta(cliente_data["id"], numero_conta, tipo="corrente")
     print(f"\n=== Conta {numero_conta} criada com sucesso para o cliente {cliente_data['nome']}! ===")
 
+def listar_contas():
+    """Busca todas as contas no banco de dados e as exibe de forma formatada."""
+    print("\n================ LISTA DE CONTAS ================")
+    
+    # 1. Chama o método do DatabaseManager que já faz o JOIN com a tabela de clientes
+    contas = db_manager.listar_contas_com_clientes()
+
+    # 2. Verifica se a lista de contas está vazia
+    if not contas:
+        print("Nenhuma conta cadastrada no sistema.")
+        print("=================================================")
+        return
+
+    # 3. Itera sobre os resultados e exibe cada conta formatada
+    for conta in contas:
+        info_conta = f"""
+            Agência:\t{conta['agencia']}
+            C/C:\t\t{conta['numero']}
+            Titular:\t{conta['titular']}
+        """
+        print(textwrap.dedent(info_conta))
+        print("-" * 40)
+    
+    print("=================================================")
+
 # ======================================================
 # Função auxiliar para "hidratar" os objetos
 # ======================================================
