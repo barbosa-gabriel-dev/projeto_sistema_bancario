@@ -7,51 +7,69 @@ sys.path.append(
             )))
 
 from sys_bank.utils import menu
-from sys_bank.services import (
-    operacao,
-    exibir_extrato,
+from sys_bank.services.operacoes import (
     criar_cliente,
     criar_conta,
+    depositar,
+    sacar,
+    transferir,
+    listar_clientes,
     listar_contas,
+    listar_transacoes,
 )
 
 
-
 def main():
-    
-    clientes = []
-    contas = []
-
     while True:
         opcao = menu()
 
-        if opcao == 'd' or opcao == '1':
-            print('Depósito')
-            operacao(clientes, "Depositar")
+        if opcao == "1":
+            nome = input("Nome: ")
+            cpf = input("CPF: ")
+            email = input("Email: ")
+            telefone = input("Telefone: ")
+            criar_cliente(nome, cpf, email, telefone)
 
-        elif opcao == 's' or opcao == '2':
-            print('saque')
-            operacao(clientes, "Sacar")
+        elif opcao == "2":
+            cliente_id = int(input("ID do Cliente: "))
+            tipo = input("Tipo de Conta (corrente/poupanca): ").lower()
+            criar_conta(cliente_id, tipo)
 
-        elif opcao == 'e' or opcao == '3':
-            print('Extrato')
-            exibir_extrato(clientes)
+        elif opcao == "3":
+            conta_id = int(input("ID da Conta: "))
+            valor = float(input("Valor do Depósito: "))
+            depositar(conta_id, valor)
 
-        elif opcao == 'nu' or opcao == '4':
-            criar_cliente(clientes)
-        
-        elif opcao == 'nc' or opcao == '5':
-            numero_conta = len(contas) + 1
-            criar_conta(numero_conta, clientes, contas)
+        elif opcao == "4":
+            conta_id = int(input("ID da Conta: "))
+            valor = float(input("Valor do Saque: "))
+            sacar(conta_id, valor)
 
-        elif opcao == 'lc' or opcao == '6':
-            listar_contas(contas)
+        elif opcao == "5":
+            origem_id = int(input("ID da Conta de Origem: "))
+            destino_id = int(input("ID da Conta de Destino: "))
+            valor = float(input("Valor da Transferência: "))
+            transferir(origem_id, destino_id, valor)
 
-        elif opcao == 'q' or opcao == '0':
+        elif opcao == "6":
+            listar_clientes()
+
+        elif opcao == "7":
+            listar_contas()
+
+        elif opcao == "8":
+            listar_transacoes()
+
+        elif opcao == "0":
+            print("Saindo do sistema...")
             break
-        
+
         else:
-            print("Operação inválida, por favor selecione a opção desejada.")
+            print("Opção inválida! Tente novamente.")
+
+
+if __name__ == "__main__":
+    main()
 
 if __name__ == "__main__":
     main()

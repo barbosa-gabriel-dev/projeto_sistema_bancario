@@ -8,6 +8,10 @@ env/
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
+*.pyo
+*.pyd
+*.db
 
 # ===== Configurações do Pytest =====
 .pytest_cache/
@@ -18,7 +22,8 @@ coverage.xml
 *.log
 *.tmp
 htmlcov/
-
+reports/
+relatorio_testes.html
 # ===== Arquivos do sistema =====
 .DS_Store
 Thumbs.db
@@ -28,6 +33,7 @@ Thumbs.db
 .idea/
 *.sublime-project
 *.sublime-workspace
+*.swp
 
 # ===== Arquivos de build =====
 build/

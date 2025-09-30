@@ -1,23 +1,31 @@
 # 🏦 Sys Bank
 
-Um sistema bancário simples, desenvolvido em Python, com estrutura modular para fins de estudo e prática de programação orientada a objetos.
+Um sistema bancário simples, desenvolvido em Python, com estrutura modular para fins de estudo e prática de programação orientada a objetos, com persistência em banco de dados SQLite.
+
 
 ## 📌 Funcionalidades
-- Criar clientes (Pessoa Física)
-- Criar contas correntes
-- Depositar e sacar valores
-- Exibir extratos detalhados
-- Listar contas cadastradas
-- Histórico de transações por conta
+- Cadastro de clientes
+- Criação de contas (corrente e poupança)
+- Depósitos, saques e transferências
+- Histórico de transações
+- Listagem de clientes, contas e transações
+- Testes automatizados com pytest
 
 
 ## 📂 Estrutura do Projeto
+```
 sys_bank/
-│── main.py # Ponto de entrada do sistema
+│── main.py # Ponto de entrada da aplicação
+│── run_tests.py # Runner de testes com relatório HTML
 │── models/ # Modelos de domínio (Conta, Cliente, Transações, etc.)
-│── services/ # Operações e regras de negócio
-│── utils/ # Utilitários (menu, helpers)
+│── services/ # Operações, regras de negócio e banco de dados
+│── utils/ # Funções auxiliares (menu, helpers)
 │── tests/ # Testes automatizados com pytest
+```
+
+
+## 🛠️ Requisitos
+- Python 3.10+
 
 
 ## 🚀 Como executar
@@ -42,7 +50,7 @@ sys_bank/
 
 
 ## 🧪 Rodando os testes
-    pytest -v
+    python run_tests.py
 
 
 ## 🎯 Objetivo do Projeto

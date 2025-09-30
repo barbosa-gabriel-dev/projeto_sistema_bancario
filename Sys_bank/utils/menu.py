@@ -3,14 +3,16 @@ import textwrap
 
 def menu():
     menu = """\n
-    ==================== MENU ====================
-    [1][d]\tDepositar
-    [2][s]\tSacar
-    [3][e]\tExtrato
-    [4][nu]\tNovo Cliente
-    [5][nc]\tNova conta
-    [6][lc]\tListar Contas
-    [0][q]\tSair
+   print("\n=== Sistema Bancário - SysBank ===")
+    print("1. Criar Cliente")
+    print("2. Criar Conta")
+    print("3. Depositar")
+    print("4. Sacar")
+    print("5. Transferir")
+    print("6. Listar Clientes")
+    print("7. Listar Contas")
+    print("8. Listar Transações")
+    print("0. Sair")
 
     => """
     

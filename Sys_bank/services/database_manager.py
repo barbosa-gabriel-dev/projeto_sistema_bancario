@@ -11,59 +11,71 @@ def get_connection():
     conn.row_factory = sqlite3.Row  # Permite acessar colunas pelo nome
     return conn
 
+class DatabaseManager:
+    def __init__(self, db_path=DB_FILE):
+        self.db_path = db_path
+        self.connection = None
 
-def init_db():
-    #NOTE: Inicializa o banco de dados com o schema básico.
-    schema = """
-    CREATE TABLE IF NOT EXISTS clientes (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nome TEXT NOT NULL,
-        cpf TEXT UNIQUE NOT NULL,
-        data_nascimento TEXT,
-        endereco TEXT,
-        tipo_cliente TEXT NOT NULL DEFAULT 'PF'
-    );
+    def connect(self):
+        """Abre conexão com o banco de dados."""
+        self.connection = sqlite3.connect(self.db_path)
+        self.connection.row_factory = sqlite3.Row  # Permite acessar colunas por nome
+        return self.connection
 
-    CREATE TABLE IF NOT EXISTS contas (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        numero INTEGER NOT NULL,
-        agencia TEXT NOT NULL DEFAULT '0001',
-        saldo REAL NOT NULL DEFAULT 0,
-        limite REAL DEFAULT 500,
-        limite_saques INTEGER DEFAULT 3,
-        limite_transacoes INTEGER DEFAULT 10,
-        cliente_id INTEGER NOT NULL,
-        FOREIGN KEY (cliente_id) REFERENCES clientes(id)
-    );
+    def close(self):
+        """Fecha conexão se estiver aberta."""
+        if self.connection:
+            self.connection.close()
+            self.connection = None
 
-    CREATE TABLE IF NOT EXISTS transacoes (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        tipo TEXT NOT NULL,
-        valor REAL NOT NULL,
-        data_hora TEXT NOT NULL DEFAULT (datetime('now')),
-        conta_id INTEGER NOT NULL,
-        FOREIGN KEY (conta_id) REFERENCES contas(id)
-    );
-    """
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.executescript(schema)
-    conn.commit()
-    conn.close()
+    def execute(self, query, params=None, commit=False):
+        """Executa uma query SQL com ou sem parâmetros."""
+        if not self.connection:
+            self.connect()
 
+        cursor = self.connection.cursor()
+        if params:
+            cursor.execute(query, params)
+        else:
+            cursor.execute(query)
 
-def reset_db():
-    """Apaga todas as tabelas e recria o schema (útil para testes)."""
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.executescript("""
-    DROP TABLE IF EXISTS transacoes;
-    DROP TABLE IF EXISTS contas;
-    DROP TABLE IF EXISTS clientes;
-    """)
-    conn.commit()
-    conn.close()
-    init_db()
+        if commit:
+            self.connection.commit()
+
+        return cursor
+
+    def create_schema(self):
+        """Cria as tabelas iniciais no banco, se não existirem."""
+        schema_sql = """
+        CREATE TABLE IF NOT EXISTS clientes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome TEXT NOT NULL,
+            cpf TEXT UNIQUE NOT NULL,
+            email TEXT UNIQUE,
+            telefone TEXT,
+            data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS contas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            cliente_id INTEGER NOT NULL,
+            tipo TEXT NOT NULL CHECK(tipo IN ('corrente', 'poupanca')),
+            saldo REAL DEFAULT 0.0,
+            ativa INTEGER DEFAULT 1,
+            data_abertura TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (cliente_id) REFERENCES clientes(id)
+        );
+
+        CREATE TABLE IF NOT EXISTS transacoes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            conta_id INTEGER NOT NULL,
+            tipo TEXT NOT NULL CHECK(tipo IN ('deposito', 'saque', 'transferencia')),
+            valor REAL NOT NULL,
+            data TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (conta_id) REFERENCES contas(id)
+        );
+        """
+        self.execute(schema_sql, commit=True)
 
 
 # =========================================================
